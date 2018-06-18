@@ -57,11 +57,17 @@ export class AquariumListService{
      * @version 1.0 
      */  
     addDeviceInformation(device: Device){
-        try{            
-            return this.deviceChildReference.set(device);                        
+        try{  
+            if(device == undefined)
+            {
+                device.battery_status = 'Reconnect device';
+                device.power_status = 'Reconnect device';                
+            }
+            
+            return this.deviceChildReference.set(device);                                        
         }catch(e){
             console.error(e);
-            this.basicAlert.showBasicAlert(e.message);
+            this.basicAlert.showBasicAlert("error: "+e.message);
         }
     }
 }

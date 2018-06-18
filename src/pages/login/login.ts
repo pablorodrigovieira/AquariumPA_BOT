@@ -54,7 +54,7 @@ export class LoginPage {
     this.email = this.formGroup.controls['email'];
     this.password = this.formGroup.controls['password'];
 
-    this.checkDeviceInformation();
+    //this.checkDeviceInformation();
 
   }
 
@@ -175,9 +175,7 @@ export class LoginPage {
     try{
       // watch change in battery status
       this.subscription = this.batteryStatus.onChange().subscribe(status => {
-        
-        //this.session.POWER_STATUS = status;
-        //this.session.BATTERY_STATUS = status.level;
+
         if(status){
           this.device.battery_status = String(status.level);
           this.device.power_status = String(status.isPlugged);

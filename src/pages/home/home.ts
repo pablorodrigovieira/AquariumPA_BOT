@@ -7,12 +7,15 @@ import { AppPreloader } from '../../utils/app-preloader';
 import { LoginPage } from '../login/login';
 import { Device } from '../../models/device';
 
+import { BatteryStatus } from '@ionic-native/battery-status';
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
 
+  subscription: any;
   device = {} as Device;
   deviceChanges = new EventEmitter<string>();
   
@@ -21,7 +24,10 @@ export class HomePage {
     private aquariumListService: AquariumListService,
     public platform: Platform,
     private basicAlert: AppAlerts,
+    private batteryStatus: BatteryStatus,
     private preloader: AppPreloader) {
+
+      this.checkDeviceInformation();
 
   }
 
@@ -70,8 +76,9 @@ export class HomePage {
   ionViewDidLoad(){
     try{
       this.platform.ready().then( async () =>{
-         await this.loadDeviceInfo();
-         this.preloader.hidePreloader();
+        this.checkDeviceInformation();
+        await this.loadDeviceInfo();
+        this.preloader.hidePreloader();
       });
     }catch(e){
       console.error(e);
@@ -105,5 +112,34 @@ export class HomePage {
       console.error(e);
       this.basicAlert.showBasicAlert(e.message);
     }
+  }
+
+  /**
+  * Check device status and Insert DB
+  * @author Pablo Vieira
+  * Date: 16/06/2018
+  * @version 1.0 
+  */
+  checkDeviceInformation(){
+    try{
+      // watch change in battery status
+      this.subscription = this.batteryStatus.onChange().subscribe(status => {
+
+        if(status){
+          this.device.battery_status = String(status.level);
+          this.device.power_status = String(status.isPlugged);
+        }
+        else{
+          this.device.battery_status = 'Reconnect device';
+          this.device.power_status = 'Reconnect device'
+        }
+        this.aquariumListService.addDeviceInformation(this.device);
+      });
+    }
+    catch(e){
+      console.error(e);
+      this.preloader.hidePreloader();
+      this.basicAlert.showBasicAlert(e.message);
+    }    
   }
 }
