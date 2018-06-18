@@ -17,7 +17,13 @@ export class AboutPage {
 
 
   }
-
+  
+  /**
+  * Logout method
+  * @author Pablo Vieira
+  * Date: 01/06/2018
+  * @version 1.0 
+  */  
   logout(){
     try{   
       this.afAuth.auth.signOut().then(() => {

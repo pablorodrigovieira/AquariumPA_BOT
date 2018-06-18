@@ -2,14 +2,22 @@
   <img class="logo" padding src="assets/imgs/logo-bot.png"/>  
   <h2 ion-text color="primary" text-center>B O T</h2>
   <ion-list no-lines no-padding>
-    <ion-item>
-      <ion-label stacked><ion-icon name="mail" item-start></ion-icon>E-mail</ion-label>
-      <ion-input type="email" placeholder="user@email.com" [(ngModel)]="user.email"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label stacked><ion-icon name="lock" item-start></ion-icon>Password</ion-label>    
-      <ion-input type="password" placeholder="*******" [(ngModel)]="user.password"></ion-input>
-    </ion-item>
+    <form [formGroup]="formGroup">
+      <ion-item>
+        <ion-label stacked><ion-icon name="mail" item-start></ion-icon>E-mail</ion-label>
+        <ion-input type="email" formControlName="email" placeholder="user@email.com" [(ngModel)]="user.email"></ion-input>
+      </ion-item>
+      <ion-item *ngIf="formGroup.get('email').hasError('required') && formGroup.get('email').touched">
+        <p ion-text color="danger"> * E-mail is required </p>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked><ion-icon name="lock" item-start></ion-icon>Password</ion-label>    
+        <ion-input type="password" placeholder="*******" formControlName="password" [(ngModel)]="user.password"></ion-input>
+      </ion-item>
+      <ion-item *ngIf="formGroup.get('password').hasError('required') && formGroup.get('password').touched">
+        <p ion-text color="danger"> * Password is required </p>
+      </ion-item>
+    </form>
     <ion-grid>
       <ion-row>
         <ion-col>

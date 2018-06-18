@@ -25,26 +25,30 @@ export class HomePage {
 
   }
 
-  
+  /**
+  * Load once settings from Firebase
+  * @author Pablo Vieira
+  * Date: 01/06/2018
+  * @version 1.0 
+  */
   async ionViewWillEnter(){
     try{
-
-      //Load once settings from Firebase
       const snapshot = await this.aquariumListService.getDeviceInformation().once('value');
       this.device = snapshot.val();
-    
-      this.preloader.hidePreloader();  
-    
     }catch(e){
       console.error(e);
       this.basicAlert.showBasicAlert(e.message);
     }      
   }
   
-  
+  /**
+  * Load if settings changed from Firebase
+  * @author Pablo Vieira
+  * Date: 01/06/2018
+  * @version 1.0 
+  */
   async loadDeviceInfo(){
     try{
-      //Load if settings changed from Firebase
       await this.aquariumListService.getDeviceInformation().on('value', (snapshot) => {
         this.deviceChanges.emit(snapshot.val());
       });
@@ -57,41 +61,41 @@ export class HomePage {
               console.log(err);
               this.basicAlert.showBasicAlert(err);
         }});
-
     }catch(e){
       console.error(e);
       this.basicAlert.showBasicAlert(e.message);
     }  
   }
 
-  
-
   ionViewDidLoad(){
     try{
-      //Wait 3 seconds to load the Images from Storage
-      setTimeout(() => this.preloader.hidePreloader(), 3000);
-      
       this.platform.ready().then( async () =>{
          await this.loadDeviceInfo();
+         this.preloader.hidePreloader();
       });
-
     }catch(e){
       console.error(e);
+      this.preloader.hidePreloader();
       this.basicAlert.showBasicAlert(e.message);
     }      
   }
-
-  
 
   ionViewWillLoad(){
     try{
       this.preloader.showPreloader();        
     }catch(e){
       console.error(e);
+      this.preloader.hidePreloader();
       this.basicAlert.showBasicAlert(e.message);
     }
   }
 
+  /**
+  * Logout method
+  * @author Pablo Vieira
+  * Date: 01/06/2018
+  * @version 1.0 
+  */  
    logout(){
     try{   
       this.afAuth.auth.signOut().then(() => {

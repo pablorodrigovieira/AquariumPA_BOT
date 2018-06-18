@@ -11,6 +11,8 @@ import { AquariumListService } from '../../services/aquarium-list.service';
 import { BatteryStatus } from '@ionic-native/battery-status';
 import { Device } from '../../models/device';
 
+import { FormGroup, AbstractControl, FormBuilder, Validators } from '@angular/forms';
+
 @IonicPage()
 @Component({
   selector: 'page-login',
@@ -18,8 +20,6 @@ import { Device } from '../../models/device';
 })
 export class LoginPage {
   
-  //COMMENTS
-
   user = {} as User;
   subscription: any;
 
@@ -28,6 +28,13 @@ export class LoginPage {
     power_status: ''
   }
 
+  //Form Validation
+  hasError = "";
+  submitForm: boolean = false;
+  formGroup: FormGroup;
+  email: AbstractControl;
+  password: AbstractControl;
+
   constructor(public navCtrl: NavController, 
     public navParams: NavParams,
     private aFireAuth: AngularFireAuth,
@@ -35,12 +42,20 @@ export class LoginPage {
     private session: AppSession,
     private preloader: AppPreloader,
     private batteryStatus: BatteryStatus,
+    public formBuilder: FormBuilder,
     private aquariumService: AquariumListService) {
-        
-    this.user.email = "pablovieira.com@gmail.com";
-    this.user.password = "123456";
+
+    //Form Validation
+    this.formGroup = formBuilder.group({
+      email:['',Validators.required],
+      password:['',Validators.required]
+    });
+
+    this.email = this.formGroup.controls['email'];
+    this.password = this.formGroup.controls['password'];
 
     this.checkDeviceInformation();
+
   }
 
   /**
@@ -51,16 +66,27 @@ export class LoginPage {
   */
   async PerformSignup(user: User){
     try{
-      if(user != null){        
-        this.preloader.showPreloader();
-        const result = await this.aFireAuth.auth.createUserWithEmailAndPassword(user.email, user.password);
-        
-        if(result){          
-           this.AddUserToSession().then(()=>{
-              this.preloader.hidePreloader();
-              this.navCtrl.setRoot(TabsPage);
-           });
-        } 
+      this.submitForm = true;
+
+      this.preloader.showPreloader();
+
+      //If form Valid, Insert into DB
+      if(this.formGroup.valid){        
+        if(user != null){        
+          const result = await this.aFireAuth.auth.createUserWithEmailAndPassword(user.email, user.password);
+          
+          if(result){          
+            this.AddUserToSession().then(()=>{ 
+                this.aquariumService.addDeviceInformation(this.device);
+                this.preloader.hidePreloader();
+                this.navCtrl.setRoot(TabsPage);
+            });
+          } 
+        }
+      }
+      else{
+        this.basicAlert.showBasicAlert("Please fill the information.");
+        this.preloader.hidePreloader();
       }
     }
     catch(e){
@@ -70,17 +96,31 @@ export class LoginPage {
     }
   }
   
+  /**
+  * Add User to Session
+  * @author Pablo Vieira
+  * Date: 01/06/2018
+  * @version 1.0 
+  */
   async AddUserToSession(){
-    //Save UID in session
-    await this.aFireAuth.authState.subscribe(data =>{
-      if(data && data.email && data.uid){
+    try{
+      //Save UID in session
+      await this.aFireAuth.authState.subscribe(data =>{
+        if(data && data.email && data.uid){
 
-        this.session.USER_ID = data.uid;
-        this.session.USER_EMAIL = data.email;
-      }
-    });       
-    
+          this.session.USER_ID = data.uid;
+          this.session.USER_EMAIL = data.email;
+        }
+      }); 
+    }
+    catch(e){
+      console.error(e);
+      this.preloader.hidePreloader();
+      this.basicAlert.showBasicAlert(e.message);
+    }
+              
   }
+
   /**
   * Perform login
   * @author Pablo Vieira
@@ -89,23 +129,33 @@ export class LoginPage {
   */
   async PerformLogin(user: User){
     try{
-      if(user != null){
-        this.checkDeviceInformation();
-        this.preloader.showPreloader();
-        const result = await this.aFireAuth.auth.signInWithEmailAndPassword(user.email, user.password);
+      this.submitForm = true;
 
-        if(result){
-          //Save UID in session
-          this.aFireAuth.authState.subscribe(data =>{
-            if(data && data.email && data.uid){
+      this.preloader.showPreloader();
 
-              this.session.USER_ID = data.uid;
-            }
-          });  
-          
-          this.preloader.hidePreloader();
-          this.navCtrl.setRoot(TabsPage);
+      //If form Valid, Insert into DB
+      if(this.formGroup.valid){
+        if(user != null){
+          this.checkDeviceInformation();
+          const result = await this.aFireAuth.auth.signInWithEmailAndPassword(user.email, user.password);
+
+          if(result){
+            //Save UID in session
+            this.aFireAuth.authState.subscribe(data =>{
+              if(data && data.email && data.uid){
+
+                this.session.USER_ID = data.uid;
+              }
+            });  
+            
+            this.preloader.hidePreloader();
+            this.navCtrl.setRoot(TabsPage);
+          }
         }
+      }
+      else{
+        this.basicAlert.showBasicAlert("Please fill the information.");
+        this.preloader.hidePreloader();
       }
     }
     catch(e){      
@@ -115,18 +165,34 @@ export class LoginPage {
     }
   }
 
+  /**
+  * Check device status and Insert DB
+  * @author Pablo Vieira
+  * Date: 16/06/2018
+  * @version 1.0 
+  */
   checkDeviceInformation(){
-    // watch change in battery status
-    this.subscription = this.batteryStatus.onChange().subscribe(status => {
-      
-      this.session.POWER_STATUS = status;
-      this.session.BATTERY_STATUS = status.level;
-
-      this.device.battery_status = String(status.level);
-      this.device.power_status = String(status.isPlugged);
-
-      this.aquariumService.addDeviceInformation(this.device);
-
-    });
+    try{
+      // watch change in battery status
+      this.subscription = this.batteryStatus.onChange().subscribe(status => {
+        
+        //this.session.POWER_STATUS = status;
+        //this.session.BATTERY_STATUS = status.level;
+        if(status){
+          this.device.battery_status = String(status.level);
+          this.device.power_status = String(status.isPlugged);
+        }
+        else{
+          this.device.battery_status = 'Reconnect device';
+          this.device.power_status = 'Reconnect device'
+        }
+        this.aquariumService.addDeviceInformation(this.device);
+      });
+    }
+    catch(e){
+      console.error(e);
+      this.preloader.hidePreloader();
+      this.basicAlert.showBasicAlert(e.message);
+    }    
   }
 }

@@ -12,17 +12,44 @@
 <ion-content padding>
   <ion-list no-lines>
 
-    <h4 ion-text color="primary" text-center>Device Information</h4>
+    <h1 ion-text color="primary" text-center>Device Information</h1>
 
-    <ion-item>
-      <ion-label><strong>Battery Status: </strong> {{device.battery_status}} %</ion-label>
-    </ion-item>
+    <ion-card class="custom-card" *ngIf="device.power_status == 'false'">
+      <ion-card-header>
+          <ion-item>
+            <ion-icon color="danger" name="md-power" item-start large></ion-icon>
+            <h1 ion-text text-center>Power Status</h1>
+          </ion-item>
+      </ion-card-header>
+      <ion-item>
+        <h4 class="font-display" text-center color="danger">OFF</h4>
+      </ion-item>
+    </ion-card>
 
-    <ion-item>
-      <ion-label><strong>Power Status: </strong> {{device.power_status}} </ion-label>
-    </ion-item>
+    <ion-card class="custom-card"  *ngIf="device.power_status == 'true'">
+      <ion-card-header>
+          <ion-item>
+            <ion-icon color="green" name="md-power" item-start large></ion-icon>
+            <h1 ion-text text-center>Power Status</h1>
+          </ion-item>
+      </ion-card-header>
+      <ion-item>
+        <h4 class="font-display" ion-text text-center color="green">ON</h4>
+      </ion-item>
+    </ion-card>
 
-    
+    <ion-card class="custom-card">
+      <ion-card-header>
+          <ion-item>
+            <ion-icon name="md-battery-charging" item-start large></ion-icon>
+            <h1 ion-text text-center>Battery Status</h1>
+          </ion-item>
+      </ion-card-header>
+      <ion-item>
+        <h4 class="font-display" ion-text text-center>{{device.battery_status}} %</h4>
+      </ion-item>
+    </ion-card>
+
   </ion-list>
 
 </ion-content>

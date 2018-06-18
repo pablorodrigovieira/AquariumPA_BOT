@@ -35,24 +35,30 @@ export class AquariumListService{
 
     }
 
-    //TODO
+    /**
+     * Get Device information from Firebase
+     * @author Pablo Vieira
+     * Date: 18/06/2018
+     * @version 1.0 
+     */  
     getDeviceInformation(){
-        try{
-            
-            return this.deviceReference;
-                        
+        try{            
+            return this.deviceReference;                        
         }catch(e){
             console.error(e);
             this.basicAlert.showBasicAlert(e.message);
         }
     }
 
-    //
+    /**
+     * Add device information into Firebase
+     * @author Pablo Vieira
+     * Date: 01/06/2018
+     * @version 1.0 
+     */  
     addDeviceInformation(device: Device){
-        try{
-            
-            return this.deviceChildReference.set(device);
-                        
+        try{            
+            return this.deviceChildReference.set(device);                        
         }catch(e){
             console.error(e);
             this.basicAlert.showBasicAlert(e.message);
