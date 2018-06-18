@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Home</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only end (click)="logout()">
+          <ion-icon name="log-out"></ion-icon>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list no-lines>
+
+    <h4 ion-text color="primary" text-center>Device Information</h4>
+
+    <ion-item>
+      <ion-label><strong>Battery Status: </strong> {{device.battery_status}} %</ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label><strong>Power Status: </strong> {{device.power_status}} </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
