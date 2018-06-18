@@ -49,6 +49,13 @@ export class AquariumListService{
 
     //
     addDeviceInformation(device: Device){
-        return this.deviceChildReference.set(device);
+        try{
+            
+            return this.deviceChildReference.set(device);
+                        
+        }catch(e){
+            console.error(e);
+            this.basicAlert.showBasicAlert(e.message);
+        }
     }
 }
