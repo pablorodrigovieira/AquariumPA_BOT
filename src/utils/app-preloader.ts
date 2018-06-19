@@ -20,11 +20,10 @@ export class AppPreloader{
     showPreloader() : void{
         try{
             this.loading = this.loadingCtrl.create({
-                //content: "Loading.."
             });
             this.loading.present();
-        }catch(e){
-            //TODO
+        }catch(e){            
+            console.error(e);
         }
     }
 
@@ -32,7 +31,7 @@ export class AppPreloader{
         try{
             this.loading.dismiss();
         }catch(e){
-
+            console.error(e);
         }
     }
 }
